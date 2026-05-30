@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppPeringkatRouteImport } from './routes/_app.peringkat'
 import { Route as AppPendataanRouteImport } from './routes/_app.pendataan'
 import { Route as AppLaporanRouteImport } from './routes/_app.laporan'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
@@ -24,11 +23,6 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AppPeringkatRoute = AppPeringkatRouteImport.update({
-  id: '/peringkat',
-  path: '/peringkat',
-  getParentRoute: () => AppRoute,
 } as any)
 const AppPendataanRoute = AppPendataanRouteImport.update({
   id: '/pendataan',
@@ -51,14 +45,12 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/laporan': typeof AppLaporanRoute
   '/pendataan': typeof AppPendataanRoute
-  '/peringkat': typeof AppPeringkatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AppDashboardRoute
   '/laporan': typeof AppLaporanRoute
   '/pendataan': typeof AppPendataanRoute
-  '/peringkat': typeof AppPeringkatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -67,13 +59,12 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/laporan': typeof AppLaporanRoute
   '/_app/pendataan': typeof AppPendataanRoute
-  '/_app/peringkat': typeof AppPeringkatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/laporan' | '/pendataan' | '/peringkat'
+  fullPaths: '/' | '/dashboard' | '/laporan' | '/pendataan'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/laporan' | '/pendataan' | '/peringkat'
+  to: '/' | '/dashboard' | '/laporan' | '/pendataan'
   id:
     | '__root__'
     | '/'
@@ -81,7 +72,6 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/laporan'
     | '/_app/pendataan'
-    | '/_app/peringkat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -104,13 +94,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_app/peringkat': {
-      id: '/_app/peringkat'
-      path: '/peringkat'
-      fullPath: '/peringkat'
-      preLoaderRoute: typeof AppPeringkatRouteImport
-      parentRoute: typeof AppRoute
     }
     '/_app/pendataan': {
       id: '/_app/pendataan'
@@ -140,14 +123,12 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppLaporanRoute: typeof AppLaporanRoute
   AppPendataanRoute: typeof AppPendataanRoute
-  AppPeringkatRoute: typeof AppPeringkatRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppLaporanRoute: AppLaporanRoute,
   AppPendataanRoute: AppPendataanRoute,
-  AppPeringkatRoute: AppPeringkatRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
