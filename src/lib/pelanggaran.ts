@@ -1,12 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type JenisPelanggaran = "Mashol" | "Masbuk" | "Tidak Jamaah" | "Telat Wirid" | "Lainnya";
+export type JenisPelanggaran = "Mashol" | "Masbuk" | "Lainnya";
 
 export const JENIS_OPTIONS: JenisPelanggaran[] = [
   "Mashol",
   "Masbuk",
-  "Tidak Jamaah",
-  "Telat Wirid",
   "Lainnya",
 ];
 

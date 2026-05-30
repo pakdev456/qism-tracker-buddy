@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 
 const KEY = "qism-ibadah-auth";
 const USERNAME = "jali";
-const PASSWORD = "ibadah 2026";
+const PASSWORD = "ibadah2026";
 
 interface AuthCtx {
   authed: boolean;
