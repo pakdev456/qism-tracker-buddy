@@ -9,38 +9,95 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppPeringkatRouteImport } from './routes/_app.peringkat'
+import { Route as AppPendataanRouteImport } from './routes/_app.pendataan'
+import { Route as AppLaporanRouteImport } from './routes/_app.laporan'
+import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppPeringkatRoute = AppPeringkatRouteImport.update({
+  id: '/peringkat',
+  path: '/peringkat',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPendataanRoute = AppPendataanRouteImport.update({
+  id: '/pendataan',
+  path: '/pendataan',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLaporanRoute = AppLaporanRouteImport.update({
+  id: '/laporan',
+  path: '/laporan',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/laporan': typeof AppLaporanRoute
+  '/pendataan': typeof AppPendataanRoute
+  '/peringkat': typeof AppPeringkatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/laporan': typeof AppLaporanRoute
+  '/pendataan': typeof AppPendataanRoute
+  '/peringkat': typeof AppPeringkatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/laporan': typeof AppLaporanRoute
+  '/_app/pendataan': typeof AppPendataanRoute
+  '/_app/peringkat': typeof AppPeringkatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/dashboard' | '/laporan' | '/pendataan' | '/peringkat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/dashboard' | '/laporan' | '/pendataan' | '/peringkat'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/_app/dashboard'
+    | '/_app/laporan'
+    | '/_app/pendataan'
+    | '/_app/peringkat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +105,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/peringkat': {
+      id: '/_app/peringkat'
+      path: '/peringkat'
+      fullPath: '/peringkat'
+      preLoaderRoute: typeof AppPeringkatRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/pendataan': {
+      id: '/_app/pendataan'
+      path: '/pendataan'
+      fullPath: '/pendataan'
+      preLoaderRoute: typeof AppPendataanRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/laporan': {
+      id: '/_app/laporan'
+      path: '/laporan'
+      fullPath: '/laporan'
+      preLoaderRoute: typeof AppLaporanRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppLaporanRoute: typeof AppLaporanRoute
+  AppPendataanRoute: typeof AppPendataanRoute
+  AppPeringkatRoute: typeof AppPeringkatRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppDashboardRoute: AppDashboardRoute,
+  AppLaporanRoute: AppLaporanRoute,
+  AppPendataanRoute: AppPendataanRoute,
+  AppPeringkatRoute: AppPeringkatRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
