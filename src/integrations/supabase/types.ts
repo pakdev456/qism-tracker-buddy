@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      pelanggaran: {
+        Row: {
+          catatan: string | null
+          created_at: string
+          id: string
+          jenis: string
+          kelas: number
+          nama: string
+          tanggal: string
+          updated_at: string
+        }
+        Insert: {
+          catatan?: string | null
+          created_at?: string
+          id?: string
+          jenis: string
+          kelas: number
+          nama: string
+          tanggal?: string
+          updated_at?: string
+        }
+        Update: {
+          catatan?: string | null
+          created_at?: string
+          id?: string
+          jenis?: string
+          kelas?: number
+          nama?: string
+          tanggal?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
