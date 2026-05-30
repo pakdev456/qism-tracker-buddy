@@ -92,3 +92,13 @@
     font-feature-settings: "ss01", "cv11";
   }
 }
+
+@media print {
+  .no-print, aside, header, nav, .fixed, .sticky { display: none !important; }
+  main { padding: 0 !important; margin: 0 !important; }
+  .print-content { display: block !important; }
+  body { background: white !important; color: black !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+
+.print-content { display: none; }

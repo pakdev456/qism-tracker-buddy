@@ -1,11 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { id as localeId } from "date-fns/locale";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import { Download, FileText } from "lucide-react";
+import { Printer, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { fetchAll } from "@/lib/pelanggaran";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +19,7 @@ export const Route = createFileRoute("/_app/laporan")({
 
 function LaporanPage() {
   const { data = [] } = useQuery({ queryKey: ["pelanggaran"], queryFn: fetchAll });
+  const printRef = useRef<HTMLDivElement>(null);
 
   const today = format(new Date(), "yyyy-MM-dd");
   const monthStart = format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), "yyyy-MM-dd");
@@ -53,111 +52,22 @@ function LaporanPage() {
     };
   }, [filtered]);
 
-  const exportPdf = () => {
-    if (filtered.length === 0) return toast.error("Tidak ada data untuk diekspor");
-
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-    const W = doc.internal.pageSize.getWidth();
-    const margin = 40;
-
-    // Header
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("LAPORAN MUKHOLIF", W / 2, 50, { align: "center" });
-    doc.setFontSize(11);
-    doc.text("Qism Ibadah OSBA", W / 2, 68, { align: "center" });
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    const periode = `Periode: ${format(parseISO(from), "d MMM yyyy", { locale: localeId })} – ${format(parseISO(to), "d MMM yyyy", { locale: localeId })}`;
-    const kelasLabel = kelas === "all" ? "Semua Kelas" : `Kelas ${kelas}`;
-    doc.text(periode, margin, 100);
-    doc.text(kelasLabel, W - margin, 100, { align: "right" });
-
-    doc.setDrawColor(0);
-    doc.line(margin, 110, W - margin, 110);
-
-    // Ringkasan
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.text(`Total Pelanggaran: ${filtered.length}`, margin, 130);
-
-    autoTable(doc, {
-      startY: 145,
-      head: [["No", "Tanggal", "Nama", "Kelas", "Jenis", "Catatan"]],
-      body: filtered.map((d, i) => [
-        i + 1,
-        format(parseISO(d.tanggal), "dd/MM/yyyy"),
-        d.nama,
-        d.kelas,
-        d.jenis,
-        d.catatan ?? "-",
-      ]),
-      styles: { fontSize: 9, cellPadding: 5 },
-      headStyles: { fillColor: [20, 20, 20], textColor: 255 },
-      alternateRowStyles: { fillColor: [245, 245, 245] },
-      theme: "grid",
-      margin: { left: margin, right: margin },
-    });
-
-    // Ringkasan tables
-    const afterY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 24;
-    doc.setFont("helvetica", "bold");
-    doc.text("Ringkasan per Jenis", margin, afterY);
-    autoTable(doc, {
-      startY: afterY + 8,
-      head: [["Jenis", "Jumlah"]],
-      body: summary.byJenis.map(([j, n]) => [j, n]),
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [20, 20, 20], textColor: 255 },
-      theme: "grid",
-      margin: { left: margin, right: W / 2 + 10 },
-      tableWidth: W / 2 - margin - 10,
-    });
-    autoTable(doc, {
-      startY: afterY + 8,
-      head: [["Kelas", "Jumlah"]],
-      body: summary.byKelas.map(([k, n]) => [`Kelas ${k}`, n]),
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [20, 20, 20], textColor: 255 },
-      theme: "grid",
-      margin: { left: W / 2 + 10, right: margin },
-      tableWidth: W / 2 - margin - 10,
-    });
-
-    // Footer signature
-    const pages = doc.getNumberOfPages();
-    for (let i = 1; i <= pages; i++) {
-      doc.setPage(i);
-      const H = doc.internal.pageSize.getHeight();
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
-      doc.setTextColor(120);
-      doc.text(`Halaman ${i} dari ${pages}`, W / 2, H - 20, { align: "center" });
-      doc.text(`Dicetak: ${format(new Date(), "d MMM yyyy HH:mm", { locale: localeId })}`, margin, H - 20);
-      doc.setTextColor(0);
+  const handlePrint = () => {
+    if (filtered.length === 0) {
+      toast.error("Tidak ada data untuk dicetak");
+      return;
     }
-
-    // Signature on last page
-    doc.setPage(pages);
-    const H = doc.internal.pageSize.getHeight();
-    doc.setFontSize(10);
-    doc.text("Mengetahui,", W - margin - 160, H - 100);
-    doc.text("Pengawas Qism Ibadah", W - margin - 160, H - 88);
-    doc.text("( ............................. )", W - margin - 160, H - 50);
-
-    doc.save(`laporan-mukholif-${from}_${to}.pdf`);
-    toast.success("Laporan PDF berhasil diunduh");
+    window.print();
   };
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Laporan</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Ekspor laporan mukholif untuk pengawas</p>
+        <p className="mt-1 text-sm text-muted-foreground">Cetak laporan mukholif untuk pengawas</p>
       </div>
 
-      <Card>
+      <Card className="no-print">
         <CardHeader><CardTitle>Filter Laporan</CardTitle></CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-4">
           <div className="space-y-2">
@@ -179,14 +89,14 @@ function LaporanPage() {
             </Select>
           </div>
           <div className="flex items-end">
-            <Button onClick={exportPdf} className="w-full">
-              <Download className="mr-2 h-4 w-4" /> Ekspor PDF
+            <Button onClick={handlePrint} className="w-full">
+              <Printer className="mr-2 h-4 w-4" /> Cetak Laporan
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3 no-print">
         <Card>
           <CardHeader><CardTitle className="text-base">Total</CardTitle></CardHeader>
           <CardContent>
@@ -218,7 +128,105 @@ function LaporanPage() {
         </Card>
       </div>
 
-      <Card>
+      {/* Printable content */}
+      <div ref={printRef} className="print-content space-y-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold uppercase tracking-wide">Laporan Mukholif</h2>
+          <p className="text-sm font-medium">Qism Ibadah OSBA</p>
+          <p className="mt-2 text-sm">
+            Periode: {format(parseISO(from), "d MMM yyyy", { locale: localeId })} – {format(parseISO(to), "d MMM yyyy", { locale: localeId })} · {kelas === "all" ? "Semua Kelas" : `Kelas ${kelas}`}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-8">
+          <div>
+            <h3 className="mb-2 text-sm font-bold uppercase">Ringkasan per Jenis</h3>
+            <table className="w-full border-collapse border border-black text-sm">
+              <thead>
+                <tr className="bg-black text-white">
+                  <th className="border border-black px-3 py-2 text-left">Jenis</th>
+                  <th className="border border-black px-3 py-2 text-right">Jumlah</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summary.byJenis.map(([j, n]) => (
+                  <tr key={j}>
+                    <td className="border border-black px-3 py-1.5">{j}</td>
+                    <td className="border border-black px-3 py-1.5 text-right">{n}</td>
+                  </tr>
+                ))}
+                {summary.byJenis.length === 0 && (
+                  <tr><td className="border border-black px-3 py-1.5 text-center" colSpan={2}>—</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <h3 className="mb-2 text-sm font-bold uppercase">Ringkasan per Kelas</h3>
+            <table className="w-full border-collapse border border-black text-sm">
+              <thead>
+                <tr className="bg-black text-white">
+                  <th className="border border-black px-3 py-2 text-left">Kelas</th>
+                  <th className="border border-black px-3 py-2 text-right">Jumlah</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summary.byKelas.map(([k, n]) => (
+                  <tr key={k}>
+                    <td className="border border-black px-3 py-1.5">Kelas {k}</td>
+                    <td className="border border-black px-3 py-1.5 text-right">{n}</td>
+                  </tr>
+                ))}
+                {summary.byKelas.length === 0 && (
+                  <tr><td className="border border-black px-3 py-1.5 text-center" colSpan={2}>—</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="mb-2 text-sm font-bold uppercase">Daftar Pelanggar</h3>
+          <table className="w-full border-collapse border border-black text-sm">
+            <thead>
+              <tr className="bg-black text-white">
+                <th className="border border-black px-3 py-2 text-left">No</th>
+                <th className="border border-black px-3 py-2 text-left">Tanggal</th>
+                <th className="border border-black px-3 py-2 text-left">Nama</th>
+                <th className="border border-black px-3 py-2 text-left">Kelas</th>
+                <th className="border border-black px-3 py-2 text-left">Jenis</th>
+                <th className="border border-black px-3 py-2 text-left">Catatan</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((d, i) => (
+                <tr key={d.id}>
+                  <td className="border border-black px-3 py-1.5">{i + 1}</td>
+                  <td className="border border-black px-3 py-1.5 whitespace-nowrap">{format(parseISO(d.tanggal), "dd/MM/yyyy")}</td>
+                  <td className="border border-black px-3 py-1.5">{d.nama}</td>
+                  <td className="border border-black px-3 py-1.5">{d.kelas}</td>
+                  <td className="border border-black px-3 py-1.5">{d.jenis}</td>
+                  <td className="border border-black px-3 py-1.5">{d.catatan ?? "—"}</td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr><td className="border border-black px-3 py-1.5 text-center" colSpan={6}>Tidak ada data</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="flex justify-between pt-8 text-sm">
+          <p>Dicetak: {format(new Date(), "d MMM yyyy HH:mm", { locale: localeId })}</p>
+          <div className="text-center">
+            <p>Mengetahui,</p>
+            <p className="mt-1">Pengawas Qism Ibadah</p>
+            <p className="mt-8">( ............................. )</p>
+          </div>
+        </div>
+      </div>
+
+      <Card className="no-print">
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><FileText className="h-4 w-4" /> Pratinjau Data</CardTitle>
         </CardHeader>
@@ -250,7 +258,7 @@ function LaporanPage() {
                 </tbody>
               </table>
               {filtered.length > 20 && (
-                <p className="mt-3 text-center text-xs text-muted-foreground">+{filtered.length - 20} baris lainnya akan ikut diekspor</p>
+                <p className="mt-3 text-center text-xs text-muted-foreground">+{filtered.length - 20} baris lainnya akan ikut dicetak</p>
               )}
             </div>
           )}
