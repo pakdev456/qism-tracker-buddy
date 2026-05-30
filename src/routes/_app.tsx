@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { LayoutDashboard, ClipboardList, FileText, Trophy, LogOut, Menu } from "lucide-react";
+import { LayoutDashboard, ClipboardList, FileText, LogOut, Menu } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Logo } from "@/components/Logo";
@@ -14,7 +14,6 @@ export const Route = createFileRoute("/_app")({
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/pendataan", label: "Pendataan", icon: ClipboardList },
-  { to: "/peringkat", label: "Peringkat", icon: Trophy },
   { to: "/laporan", label: "Laporan", icon: FileText },
 ] as const;
 
