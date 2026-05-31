@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 const KEY = "qism-ibadah-auth";
-const USERNAME = "jali";
+const USERNAME = "kober";"ustadz";
 const PASSWORD = "ibadah2026";
 
 interface AuthCtx {
