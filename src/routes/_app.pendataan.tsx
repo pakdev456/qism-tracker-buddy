@@ -20,6 +20,7 @@ import {
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_app/pendataan")({
@@ -57,7 +58,6 @@ function PendataanPage() {
   const [openAdd, setOpenAdd] = useState(false);
   const [editing, setEditing] = useState<Pelanggaran | null>(null);
   const [deleting, setDeleting] = useState<Pelanggaran | null>(null);
-  const [deletingAll, setDeletingAll] = useState(false);
 
   const [filterKelas, setFilterKelas] = useState<string>("all");
   const [search, setSearch] = useState("");
@@ -119,13 +119,12 @@ function PendataanPage() {
 
   const deleteAll = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("pelanggaran").delete();
+      const { error } = await supabase.from("pelanggaran").delete().not("id", "is", null);
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["pelanggaran"] });
       toast.success("Semua Mukholif dihapus");
-      setDeletingAll(false);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -138,9 +137,33 @@ function PendataanPage() {
           <p className="mt-1 text-sm text-muted-foreground">Kelola data pelanggar ibadah</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="destructive" onClick={() => setDeletingAll(true)} className="rounded-xl shadow-sm">
-            <Trash2 className="mr-1 h-4 w-4" /> Hapus Semua Mukholif
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" className="rounded-xl shadow-sm">
+                <Trash2 className="mr-1 h-4 w-4" /> Hapus Semua Mukholif
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Hapus semua Mukholif?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Semua data mukholif akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Batal</AlertDialogCancel>
+                <AlertDialogAction asChild>
+                  <Button
+                    variant="destructive"
+                    onClick={() => deleteAll.mutate()}
+                    disabled={deleteAll.isPending}
+                  >
+                    {deleteAll.isPending ? "Menghapus…" : "Hapus semua"}
+                  </Button>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <Button onClick={() => setOpenAdd(true)} className="rounded-xl shadow-sm">
             <Plus className="mr-1 h-4 w-4" /> Tambah Pelanggar
           </Button>
@@ -264,22 +287,6 @@ function PendataanPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={deletingAll} onOpenChange={(o) => !o && setDeletingAll(false)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Hapus semua Mukholif?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Semua data mukholif akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteAll.mutate()}>
-              {deleteAll.isPending ? "Menghapus…" : "Hapus semua"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
