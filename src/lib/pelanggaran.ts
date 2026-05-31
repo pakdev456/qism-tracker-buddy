@@ -1,11 +1,18 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type JenisPelanggaran = "Mashol" | "Masbuk" | "Lainnya";
+export type JenisPelanggaran = string;
 
-export const JENIS_OPTIONS: JenisPelanggaran[] = [
-  "Mashol",
-  "Masbuk",
-  "Lainnya",
+// Saran cepat untuk jenis "Lainnya"
+export const JENIS_OPTIONS: string[] = [
+  "Tidak Berjamaah",
+  "Tidur Saat Sholat",
+  "Ribut di Masjid",
+  "Tidak Pakai Songkok",
+  "Tidak Pakai Sarung",
+  "Telat ke Masjid",
+  "Tidak Sholat",
+  "Bercanda Saat Sholat",
+  "Keluar Tanpa Izin",
 ];
 
 export interface Pelanggaran {
