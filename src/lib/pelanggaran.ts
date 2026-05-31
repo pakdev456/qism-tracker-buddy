@@ -4,15 +4,14 @@ export type JenisPelanggaran = string;
 
 // Saran cepat untuk jenis "Lainnya"
 export const JENIS_OPTIONS: string[] = [
-  "Tidak Berjamaah",
-  "Tidur Saat Sholat",
+  "senderan ke tiang",
   "Ribut di Masjid",
-  "Tidak Pakai Songkok",
-  "Tidak Pakai Sarung",
-  "Telat ke Masjid",
-  "Tidak Sholat",
+  "Tidak Pakai Songkok/peci",
+  "Tidak Pakai celana syari",
+  "lari di masjid",
+  "bercanda di masjid",
   "Bercanda Saat Sholat",
-  "Keluar Tanpa Izin",
+  "ngobrol ",
 ];
 
 export interface Pelanggaran {
