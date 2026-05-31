@@ -2,12 +2,16 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/ssr.js",
-      "use": "@vercel/node"
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist/client",
+        "buildCommand": "npm run build"
+      }
     },
     {
-      "src": "dist/client/**",
-      "use": "@vercel/static"
+      "src": "api/ssr.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
